@@ -1,4 +1,5 @@
 // Application
+#include "rasterizer/rasterizer.hpp"
 #include "settings.hpp"
 
 // SFML
@@ -7,6 +8,8 @@
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT), settings::APPLICATION_NAME);
+
+	sr::Rasterizer software_rasterizer;
 
 	while (window.isOpen())
 	{

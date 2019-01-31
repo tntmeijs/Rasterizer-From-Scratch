@@ -10,6 +10,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(SOURCES ${SRC_DIR}/main.cpp)
 set(HEADERS ${SRC_DIR}/settings.hpp)
 
+set(RASTERIZER_SOURCES ${SRC_DIR}/rasterizer/rasterizer.cpp)
+set(RASTERIZER_HEADERS ${SRC_DIR}/rasterizer/rasterizer.hpp)
+
 # Add SFML
 set(SFML_DIR ${CMAKE_CURRENT_SOURCE_DIR}/_deps/SFML)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/_deps/SFML)
@@ -17,11 +20,13 @@ find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 
 # Source groups to keep the source code nice and tidy
 source_group("Application" FILES ${SOURCES} ${HEADERS})
+source_group("Rasterizer" FILES ${RASTERIZER_SOURCES} ${RASTERIZER_HEADERS})
 
 # Create the executable
 add_executable(
     ${PROJECT_NAME}
-    ${SOURCES} ${HEADERS})
+    ${SOURCES} ${HEADERS}
+	${RASTERIZER_SOURCES} ${RASTERIZER_HEADERS})
 
 # Include all files for the project
 target_include_directories(${PROJECT_NAME} PRIVATE ${SRC_DIR})
