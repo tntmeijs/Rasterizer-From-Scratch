@@ -11,9 +11,9 @@ cmake .
 cd ../../
 
 # Perform an out-of-source build to keep the directory clean
-rm -rf Build
-mkdir Build
-cd Build
+rm -rf build
+mkdir build
+cd build
 
 # Generate project files
 cmake ..

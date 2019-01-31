@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 # Application sources
 set(SOURCES ${SRC_DIR}/main.cpp)
+set(HEADERS ${SRC_DIR}/settings.hpp)
 
 # Add SFML
 set(SFML_DIR ${CMAKE_CURRENT_SOURCE_DIR}/_deps/SFML)
@@ -15,12 +16,12 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/_deps/SFML)
 find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 
 # Source groups to keep the source code nice and tidy
-source_group("Application" FILES ${SOURCES})
+source_group("Application" FILES ${SOURCES} ${HEADERS})
 
 # Create the executable
 add_executable(
     ${PROJECT_NAME}
-    ${SOURCES})
+    ${SOURCES} ${HEADERS})
 
 # Include all files for the project
 target_include_directories(${PROJECT_NAME} PRIVATE ${SRC_DIR})
