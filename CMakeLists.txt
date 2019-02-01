@@ -19,6 +19,10 @@ set(RENDERER_HEADERS
 	${SRC_DIR}/renderer/structures.hpp
 	${SRC_DIR}/renderer/model.hpp)
 
+# Add GLM
+set(GLM_DIR ${CMAKE_CURRENT_SOURCE_DIR}/_deps/glm)
+find_package(GLM REQUIRED)
+
 # Add SFML
 set(SFML_DIR ${CMAKE_CURRENT_SOURCE_DIR}/_deps/SFML)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/_deps/SFML)
@@ -47,6 +51,7 @@ add_executable(
 
 # Include all files for the project
 target_include_directories(${PROJECT_NAME} PRIVATE ${SRC_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${GLM_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SFML_DIR}/include)
 
 # Link against SFML
