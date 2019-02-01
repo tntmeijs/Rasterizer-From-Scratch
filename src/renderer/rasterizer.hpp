@@ -1,6 +1,7 @@
 #pragma once
 
 // C++ standard
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -12,12 +13,17 @@ namespace sr
 	class Rasterizer
 	{
 	public:
-		Rasterizer() = default;
+		Rasterizer();
 		~Rasterizer() = default;
+
+		void Initialize(std::uint32_t window_width, std::uint32_t window_height);
 
 		void AddModel(const std::shared_ptr<Model>& model) noexcept;
 
 	private:
 		std::vector<std::weak_ptr<Model>> m_models;
+
+		std::uint32_t m_window_width;
+		std::uint32_t m_window_height;
 	};
 }

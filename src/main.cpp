@@ -14,6 +14,7 @@ int main()
 
 	// Rasterizer itself
 	sr::Rasterizer software_rasterizer;
+	software_rasterizer.Initialize(settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT);
 
 	// Vertex data for a triangle (3 vertices)
 	std::shared_ptr<sr::Vertex[]> model_data(new sr::Vertex[3]);
@@ -24,6 +25,9 @@ int main()
 	// Triangle "model"
 	std::shared_ptr<sr::Model> triangle_model = std::make_shared<sr::Model>();
 	triangle_model->Create(model_data, nullptr, 3 * sizeof(sr::Vertex), 0);
+
+	// Add the triangle model to the model vector in the rasterizer (effectively queuing it for rendering)
+	software_rasterizer.AddModel(triangle_model);
 
 	while (window.isOpen())
 	{
