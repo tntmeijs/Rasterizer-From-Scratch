@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Application sources
 set(SOURCES ${SRC_DIR}/main.cpp)
-set(HEADERS ${SRC_DIR}/settings.hpp)
+set(HEADERS ${SRC_DIR}/settings.hpp ${SRC_DIR}/utility.hpp)
 
 set(RENDERER_SOURCES
 	${SRC_DIR}/renderer/rasterizer.cpp
