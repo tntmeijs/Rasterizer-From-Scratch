@@ -22,6 +22,12 @@ namespace sr
 			size_t vertex_data_size,
 			size_t index_data_size) noexcept;
 
+		const std::weak_ptr<Vertex[]>& GetVertexData() const noexcept;
+		const std::weak_ptr<std::int32_t>& GetIndexData() const noexcept;
+
+		size_t GetVertexDataSize() const noexcept;
+		size_t GetIndexDataSize() const noexcept;
+
 	private:
 		std::weak_ptr<Vertex[]> m_vertex_data;
 		std::weak_ptr<std::int32_t> m_index_data;
