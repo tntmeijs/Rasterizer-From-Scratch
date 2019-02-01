@@ -3,4 +3,4 @@
 	url = https://github.com/SFML/SFML.git
 [submodule "_deps/glm"]
 	path = _deps/glm
-	url = https://github.com/g-truc/glm
+	url = https://github.com/g-truc/glm.git
