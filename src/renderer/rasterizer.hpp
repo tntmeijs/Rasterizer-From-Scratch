@@ -13,6 +13,8 @@ namespace sr
 {
 	class Model;
 
+	struct Pixel;
+
 	class Rasterizer
 	{
 	public:
@@ -21,8 +23,8 @@ namespace sr
 
 		void Initialize(std::uint32_t window_width, std::uint32_t window_height);
 		void AddModel(const std::shared_ptr<Model>& model) noexcept;
-		void SetClearColor(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a = 255);
-		const std::uint8_t* const Render() noexcept;
+		void SetClearColor(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a);
+		const Pixel* const Render() noexcept;
 
 	private:
 		void ClearScreen();
@@ -36,7 +38,7 @@ namespace sr
 		std::uint32_t m_window_width;
 		std::uint32_t m_window_height;
 
-		std::uint8_t* m_pixel_data;
+		Pixel* m_frame_buffer;
 		std::uint8_t m_clear_color[4];
 	};
 }

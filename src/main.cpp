@@ -3,6 +3,7 @@
 #include "renderer/rasterizer.hpp"
 #include "renderer/structures.hpp"
 #include "settings.hpp"
+#include "utility.hpp"
 
 // SFML
 #include <SFML/Graphics.hpp>
@@ -26,13 +27,18 @@ int main()
 	// Rasterizer itself
 	sr::Rasterizer software_rasterizer;
 	software_rasterizer.Initialize(settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT);
-	software_rasterizer.SetClearColor(255, 229, 180);
+	software_rasterizer.SetClearColor(255, 255, 255, 255);
 
 	// Vertex data for a triangle (3 vertices)
 	std::shared_ptr<sr::Vertex[]> model_data(new sr::Vertex[3]);
-	model_data[0] = { -0.5,  0.5, 0.0 };
-	model_data[0] = {  0.5,  0.5, 0.0 };
-	model_data[0] = {  0.0, -0.5, 0.0 };
+	model_data[0] = { -0.5,  0.5, 1.0 };
+	model_data[1] = {  0.5,  0.5, 1.0 };
+	model_data[2] = {  0.0, -0.5, 1.0 };
+
+	// Convert the vertex positions from NDC to raster space
+	model_data[0].position = utility::NDCToRasterSpace(model_data[0].position, settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT);
+	model_data[1].position = utility::NDCToRasterSpace(model_data[1].position, settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT);
+	model_data[2].position = utility::NDCToRasterSpace(model_data[2].position, settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT);
 
 	// Triangle "model"
 	std::shared_ptr<sr::Model> triangle_model = std::make_shared<sr::Model>();
@@ -51,8 +57,10 @@ int main()
 		}
 
 		// Render the scene and save the output in the output texture
-		const std::uint8_t* const data = software_rasterizer.Render();
-		rasterizer_output.update(data);
+		const sr::Pixel* const data = software_rasterizer.Render();
+
+		// Cast the data to a format readable by SFML (data is an array of structs that hold 4 color components as uint8)
+		rasterizer_output.update(reinterpret_cast<const std::uint8_t* const>(data));
 
 		window.clear();
 		window.draw(final_output);
