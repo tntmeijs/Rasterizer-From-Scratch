@@ -3,8 +3,15 @@
 # Update all submodules for this project
 git submodule update --init
 
+# Generate the CMake files for the GLM project
+cd _deps/GLM
+cmake .
+
+# Back to the _deps folder
+cd ../
+
 # Generate the CMake files for the SFML project
-cd _deps/SFML
+cd SFML
 cmake .
 
 # Back to the root folder

@@ -8,3 +8,6 @@ cmake ..
 
 # Back to the root folder
 cd ../
+
+echo "Reloading finished!"
+read -p "Press any key to continue..."
