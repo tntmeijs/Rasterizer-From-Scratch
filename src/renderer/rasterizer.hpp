@@ -21,10 +21,11 @@ namespace sr
 
 		void Initialize(std::uint32_t window_width, std::uint32_t window_height);
 		void AddModel(const std::shared_ptr<Model>& model) noexcept;
-		void SetClearColor(const glm::vec4& clear_color);
-		void Render() noexcept;
+		void SetClearColor(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a = 255);
+		const std::uint8_t* const Render() noexcept;
 
 	private:
+		void ClearScreen();
 		void RasterizeModelWithIndices(const std::shared_ptr<Model>& model);
 		void RasterizeModelWithoutIndices(const std::shared_ptr<Model>& model);
 		void RasterizeTriangle(const glm::vec3& vertex_0, const glm::vec3& vertex_1, const glm::vec3& vertex_2);
@@ -36,7 +37,6 @@ namespace sr
 		std::uint32_t m_window_height;
 
 		std::uint8_t* m_pixel_data;
-
-		glm::vec4 m_clear_color;
+		std::uint8_t m_clear_color[4];
 	};
 }

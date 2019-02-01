@@ -9,7 +9,7 @@ sr::Rasterizer::Rasterizer()
 	: m_window_width(0)
 	, m_window_height(0)
 	, m_pixel_data(nullptr)
-	, m_clear_color(0, 0, 0, 1)
+	, m_clear_color{ 0, 0, 0, 1 }
 {
 }
 
@@ -33,22 +33,44 @@ void sr::Rasterizer::AddModel(const std::shared_ptr<Model>& model) noexcept
 	m_models.push_back(model);
 }
 
-void sr::Rasterizer::SetClearColor(const glm::vec4& clear_color)
+void sr::Rasterizer::SetClearColor(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a)
 {
-	m_clear_color = clear_color;
+	m_clear_color[0] = r;
+	m_clear_color[1] = g;
+	m_clear_color[2] = b;
+	m_clear_color[3] = a;
 }
 
-void sr::Rasterizer::Render() noexcept
+const std::uint8_t* const sr::Rasterizer::Render() noexcept
 {
-	for (size_t i = 0; i < m_models.size(); ++i)
+	for (const auto& model : m_models)
 	{
-		if (auto ptr = m_models[i].lock())
+		if (const auto& ptr = model.lock())
 		{
+			// Clear the buffer with the specified clear color
+			ClearScreen();
+
 			// If no index data is available, rasterize the model without indices
 			if (0 == ptr->GetIndexDataSize())
 				RasterizeModelWithIndices(ptr);
 			else
 				RasterizeModelWithoutIndices(ptr);
+		}
+	}
+
+	return m_pixel_data;
+}
+
+void sr::Rasterizer::ClearScreen()
+{
+	auto bytes_per_pixel = static_cast<size_t>(settings::BYTES_PER_PIXEL);
+
+	for (size_t i = 0; i < m_window_width * m_window_height * bytes_per_pixel; i += bytes_per_pixel)
+	{
+		// For each component per pixel, set its color value
+		for (size_t j = 0; j < bytes_per_pixel; ++j)
+		{
+			m_pixel_data[i + j] = m_clear_color[j];
 		}
 	}
 }

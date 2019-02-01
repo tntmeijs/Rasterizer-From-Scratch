@@ -12,9 +12,21 @@ int main()
 	// Window used to visualize the rasterizer output
 	sf::RenderWindow window(sf::VideoMode(settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT), settings::APPLICATION_NAME);
 
+	// Texture that will hold the rasterizer pixel data
+	sf::Texture rasterizer_output;
+
+	// Create the output texture
+	if (!rasterizer_output.create(settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT))
+		return -1;
+
+	// Sprite used to display the output texture
+	sf::Sprite final_output;
+	final_output.setTexture(rasterizer_output);
+
 	// Rasterizer itself
 	sr::Rasterizer software_rasterizer;
 	software_rasterizer.Initialize(settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT);
+	software_rasterizer.SetClearColor(255, 229, 180);
 
 	// Vertex data for a triangle (3 vertices)
 	std::shared_ptr<sr::Vertex[]> model_data(new sr::Vertex[3]);
@@ -38,7 +50,12 @@ int main()
 				window.close();
 		}
 
+		// Render the scene and save the output in the output texture
+		const std::uint8_t* const data = software_rasterizer.Render();
+		rasterizer_output.update(data);
+
 		window.clear();
+		window.draw(final_output);
 		window.display();
 	}
 
