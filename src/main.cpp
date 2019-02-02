@@ -32,6 +32,11 @@ int main()
 	software_rasterizer.Initialize(settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT);
 	software_rasterizer.SetClearColor(255, 255, 255, 255);
 
+	// Add a camera and use it as the current active camera
+	double aspect_ratio = static_cast<double>(settings::WINDOW_WIDTH) / static_cast<double>(settings::WINDOW_HEIGHT);
+	auto new_camera_index = software_rasterizer.AddCamera(60.0, aspect_ratio, { 0.0, 4.0, 7 }, { 0.0, 0.0, 0.0 });
+	software_rasterizer.SetActiveCameraIndex(new_camera_index);
+
 	// Vertex data for an indexed cube
 	std::shared_ptr<sr::Vertex[]> cube_vertex_data(new sr::Vertex[8]);
 	cube_vertex_data[0] = {  0.5, -0.5, -0.5 };

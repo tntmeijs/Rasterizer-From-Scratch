@@ -1,6 +1,7 @@
 #include "renderer/rasterizer.hpp"
 
 // Application
+#include "renderer/camera.hpp"
 #include "renderer/model.hpp"
 #include "renderer/structures.hpp"
 #include "settings.hpp"
@@ -10,6 +11,7 @@ sr::Rasterizer::Rasterizer()
 	, m_window_height(0)
 	, m_frame_buffer(nullptr)
 	, m_clear_color{ 0, 0, 0, 255 }
+	, m_active_camera_index(-1)
 {
 }
 
@@ -30,10 +32,29 @@ void sr::Rasterizer::Initialize(std::uint32_t window_width, std::uint32_t window
 
 void sr::Rasterizer::AddModel(const std::shared_ptr<Model>& model, const std::vector<glm::mat4>& model_matrices) noexcept
 {
-	m_models.push_back(std::make_pair(model, model_matrices));
+	m_models.emplace_back(model, model_matrices);
 }
 
-void sr::Rasterizer::SetClearColor(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a)
+const int sr::Rasterizer::AddCamera(double field_of_view_degrees, double aspect_ratio, const glm::vec3 & position, const glm::vec3 & target) noexcept
+{
+	const auto& camera = std::make_shared<Camera>();
+	camera->Create(field_of_view_degrees, aspect_ratio, position, target);
+
+	m_cameras.push_back(camera);
+	return m_cameras.size() - 1;
+}
+
+void sr::Rasterizer::RemoveCamera(int index) noexcept
+{
+	// Index out of bounds
+	if (index < 0 || static_cast<int>(m_cameras.size()) >= index)
+		return;
+
+	// Remove the camera at the specified index
+	m_cameras.erase(m_cameras.begin() + index);
+}
+
+void sr::Rasterizer::SetClearColor(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a) noexcept
 {
 	m_clear_color[0] = r;
 	m_clear_color[1] = g;
@@ -41,8 +62,26 @@ void sr::Rasterizer::SetClearColor(std::uint8_t r, std::uint8_t g, std::uint8_t 
 	m_clear_color[3] = a;
 }
 
+void sr::Rasterizer::SetActiveCameraIndex(unsigned int index) noexcept
+{
+	// Index out of bounds
+	if (index < 0 || m_cameras.size() >= index)
+		return;
+
+	m_active_camera_index = index;
+}
+
+const int sr::Rasterizer::GetActiveCameraIndex() const noexcept
+{
+	return m_active_camera_index;
+}
+
 const sr::Pixel* const sr::Rasterizer::Render() noexcept
 {
+	// No need to render the scene without a camera
+	if (0 > m_active_camera_index || m_cameras.empty())
+		return nullptr;
+
 	for (const auto& model : m_models)
 	{
 		if (const auto& ptr = model.first.lock())
