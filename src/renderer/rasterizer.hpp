@@ -23,6 +23,8 @@ namespace sr
 		~Rasterizer();
 
 		void Initialize(std::uint32_t window_width, std::uint32_t window_height);
+		void Update() const noexcept;
+		void ClearScreen();
 
 		// When more than one model matrix is passed, the model will be "instanced"
 		void AddModel(const std::shared_ptr<Model>& model, const std::vector<glm::mat4>& model_matrices) noexcept;
@@ -38,10 +40,9 @@ namespace sr
 		const Pixel* const Render() noexcept;
 
 	private:
-		void ClearScreen();
-		void RasterizeModelWithIndices(const std::shared_ptr<Model>& model, const glm::mat4& matrix);
-		void RasterizeModelWithoutIndices(const std::shared_ptr<Model>& model, const glm::mat4& matrix);
-		void RasterizeTriangle(const glm::vec3& vertex_0, const glm::vec3& vertex_1, const glm::vec3& vertex_2);
+		void RasterizeModelWithIndices(const std::shared_ptr<Model>& model, const glm::mat4& model_matrix, const glm::mat4& projection_view_matrix);
+		void RasterizeModelWithoutIndices(const std::shared_ptr<Model>& model, const glm::mat4& model_matrix, const glm::mat4& projection_view_matrix);
+		void RasterizeTriangle(const glm::vec4& vertex_0, const glm::vec4& vertex_1, const glm::vec4& vertex_2);
 
 	private:
 		std::vector<std::pair<std::weak_ptr<Model>, std::vector<glm::mat4>>> m_models;

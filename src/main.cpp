@@ -30,7 +30,7 @@ int main()
 	// Rasterizer itself
 	sr::Rasterizer software_rasterizer;
 	software_rasterizer.Initialize(settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT);
-	software_rasterizer.SetClearColor(255, 255, 255, 255);
+	software_rasterizer.SetClearColor(0, 0, 0, 255);
 
 	// Add a camera and use it as the current active camera
 	double aspect_ratio = static_cast<double>(settings::WINDOW_WIDTH) / static_cast<double>(settings::WINDOW_HEIGHT);
@@ -70,7 +70,7 @@ int main()
 	const glm::mat4 identity(1.f);
 	glm::mat4 matrix_0, matrix_1, matrix_2, matrix_3;
 
-	matrix_0 = glm::translate(identity, glm::vec3( 0.0,  0.0,  1.0));
+	matrix_0 = glm::translate(identity, glm::vec3( 0.0, 0.0, 0.0));
 	matrix_0 = glm::rotate(matrix_0, glm::radians(20.0f), glm::vec3(0, 1, 0));
 	
 	matrix_1 = glm::translate(identity, glm::vec3(-4.0, 1.0, 0.0));
@@ -79,7 +79,7 @@ int main()
 	matrix_2 = glm::translate(identity, glm::vec3(3.0, -1.0, 0.0));
 	matrix_2 = glm::rotate(matrix_2, glm::radians(65.0f), glm::vec3(0, 1, 0));
 	
-	matrix_3 = glm::translate(identity, glm::vec3(0.0, 0.0, -2.0));
+	matrix_3 = glm::translate(identity, glm::vec3(0.0, 0.0, -1.0));
 	matrix_3 = glm::rotate(matrix_3, glm::radians(37.5f), glm::vec3(0, 0, 1));
 
 	// Add the model to the model vector in the rasterizer (effectively queuing it for rendering)
@@ -94,6 +94,12 @@ int main()
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
+
+		// Clear the render output
+		software_rasterizer.ClearScreen();
+
+		// Perform some updates before rendering the scene
+		software_rasterizer.Update();
 
 		// Render the scene and save the output in the output texture
 		const sr::Pixel* const data = software_rasterizer.Render();
