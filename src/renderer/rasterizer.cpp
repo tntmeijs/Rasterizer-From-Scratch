@@ -11,6 +11,7 @@ sr::Rasterizer::Rasterizer()
 	: m_window_width(0)
 	, m_window_height(0)
 	, m_frame_buffer(nullptr)
+	, m_depth_buffer(nullptr)
 	, m_clear_color{ 0, 0, 0, 255 }
 	, m_active_camera_index(-1)
 {
@@ -20,6 +21,9 @@ sr::Rasterizer::~Rasterizer()
 {
 	if (m_frame_buffer)
 		delete[] m_frame_buffer;
+
+	if (m_depth_buffer)
+		delete[] m_depth_buffer;
 }
 
 void sr::Rasterizer::Initialize(std::uint32_t window_width, std::uint32_t window_height)
@@ -29,6 +33,9 @@ void sr::Rasterizer::Initialize(std::uint32_t window_width, std::uint32_t window
 
 	// Allocate memory to store the pixel data in
 	m_frame_buffer = new Pixel[window_width * window_height];
+
+	// Allocate memory to store the depth data in
+	m_depth_buffer = new double[window_width * window_height];
 }
 
 void sr::Rasterizer::Update() const noexcept
@@ -112,18 +119,27 @@ const sr::Pixel* const sr::Rasterizer::Render() noexcept
 	return m_frame_buffer;
 }
 
-void sr::Rasterizer::ClearScreen()
+void sr::Rasterizer::ClearScreen(unsigned int flags)
 {
 	for (size_t i = 0; i < m_window_width * m_window_height; ++i)
 	{
-		// For each component per pixel, set its color value
-		m_frame_buffer[i] =
+		if (flags & (1 << static_cast<unsigned int>(ClearFlag::Color)))
 		{
-			m_clear_color[0],
-			m_clear_color[1],
-			m_clear_color[2],
-			m_clear_color[3]
-		};
+			// For each component per pixel, set its color value
+			m_frame_buffer[i] =
+			{
+				m_clear_color[0],
+				m_clear_color[1],
+				m_clear_color[2],
+				m_clear_color[3]
+			};
+		}
+
+		if (flags & (1 << static_cast<unsigned int>(ClearFlag::Depth)))
+		{
+			// Zero-out the depth buffer
+			m_depth_buffer[i] = 0.0;
+		}
 	}
 }
 
@@ -218,15 +234,27 @@ void sr::Rasterizer::RasterizeTriangle(const glm::vec4& vertex_0, const glm::vec
 			float edge_gamma	= glm::dot(edge_2, sample);
 
 			// If the sample lies on the triangle, it should be shaded
-			if ((edge_alpha	>= 0.0)	&&
-				(edge_beta	>= 0.0)	&&
-				(edge_gamma	>= 0.0))
+			if ((edge_alpha >= 0.0) &&
+				(edge_beta >= 0.0) &&
+				(edge_gamma >= 0.0))
 			{
-				auto r = static_cast<std::uint8_t>(glm::floor(255.0 * edge_alpha));
-				auto g = static_cast<std::uint8_t>(glm::floor(255.0 * edge_beta));
-				auto b = static_cast<std::uint8_t>(glm::floor(255.0 * edge_gamma));
+				// Interpolate 1/w (the bigger the value, the closer it is to the camera)
+				double one_over_w = (constant.x * sample.x) + (constant.y * sample.y) + constant.z;
 
-				m_frame_buffer[x + (y * m_window_width)] = { r, g, b, 255 };
+				// Perform a depth test using the "one_over_w" value (this is a "less_than_equal" depth test in OGL / DX)
+				// The reason it is ">=" instead of "<=" is that the value is greater the closer it is to the camera,
+				// which is the opposite of what you would normally have. This is why the comparison is flipped.
+				if (one_over_w >= m_depth_buffer[x + (y * m_window_width)])
+				{
+					// Store the depth value of the current fragment
+					m_depth_buffer[x + (y * m_window_width)] = one_over_w;
+
+					auto r = static_cast<std::uint8_t>(glm::floor(255.0 * edge_alpha));
+					auto g = static_cast<std::uint8_t>(glm::floor(255.0 * edge_beta));
+					auto b = static_cast<std::uint8_t>(glm::floor(255.0 * edge_gamma));
+
+					m_frame_buffer[x + (y * m_window_width)] = { r, g, b, 255 };
+				}
 			}
 		}
 	}

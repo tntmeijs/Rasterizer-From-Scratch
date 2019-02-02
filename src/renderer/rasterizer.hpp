@@ -16,6 +16,12 @@ namespace sr
 
 	struct Pixel;
 
+	enum class ClearFlag
+	{
+		Color = 0x01,
+		Depth = 0x02
+	};
+
 	class Rasterizer
 	{
 	public:
@@ -24,7 +30,7 @@ namespace sr
 
 		void Initialize(std::uint32_t window_width, std::uint32_t window_height);
 		void Update() const noexcept;
-		void ClearScreen();
+		void ClearScreen(unsigned int flags);
 
 		// When more than one model matrix is passed, the model will be "instanced"
 		void AddModel(const std::shared_ptr<Model>& model, const std::vector<glm::mat4>& model_matrices) noexcept;
@@ -54,6 +60,9 @@ namespace sr
 		std::uint32_t m_window_height;
 
 		Pixel* m_frame_buffer;
+
+		double* m_depth_buffer;
+
 		std::uint8_t m_clear_color[4];
 	};
 }

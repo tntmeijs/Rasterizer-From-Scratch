@@ -95,8 +95,13 @@ int main()
 				window.close();
 		}
 
-		// Clear the render output
-		software_rasterizer.ClearScreen();
+		// Clear flags
+		unsigned int flags = 0;
+		flags |= static_cast<unsigned int>(sr::ClearFlag::Color);
+		flags |= static_cast<unsigned int>(sr::ClearFlag::Depth);
+
+		// Clear render target
+		software_rasterizer.ClearScreen(flags);
 
 		// Perform some updates before rendering the scene
 		software_rasterizer.Update();
