@@ -12,12 +12,14 @@ set(HEADERS ${SRC_DIR}/settings.hpp ${SRC_DIR}/utility.hpp)
 
 set(RENDERER_SOURCES
 	${SRC_DIR}/renderer/rasterizer.cpp
-	${SRC_DIR}/renderer/model.cpp)
+	${SRC_DIR}/renderer/model.cpp
+	${SRC_DIR}/renderer/camera.cpp)
 
 set(RENDERER_HEADERS
 	${SRC_DIR}/renderer/rasterizer.hpp
 	${SRC_DIR}/renderer/structures.hpp
-	${SRC_DIR}/renderer/model.hpp)
+	${SRC_DIR}/renderer/model.hpp
+	${SRC_DIR}/renderer/camera.hpp)
 
 # Add GLM
 set(GLM_DIR ${CMAKE_CURRENT_SOURCE_DIR}/_deps/glm)

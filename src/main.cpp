@@ -8,6 +8,9 @@
 // SFML
 #include <SFML/Graphics.hpp>
 
+// GLM
+#include <glm/gtc/matrix_transform.hpp>
+
 int main()
 {
 	// Window used to visualize the rasterizer output
@@ -27,25 +30,61 @@ int main()
 	// Rasterizer itself
 	sr::Rasterizer software_rasterizer;
 	software_rasterizer.Initialize(settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT);
-	software_rasterizer.SetClearColor(255, 255, 255, 255);
+	software_rasterizer.SetClearColor(0, 0, 0, 255);
 
-	// Vertex data for a triangle (3 vertices)
-	std::shared_ptr<sr::Vertex[]> model_data(new sr::Vertex[3]);
-	model_data[0] = { -0.5,  0.5, 1.0 };
-	model_data[1] = {  0.5,  0.5, 1.0 };
-	model_data[2] = {  0.0, -0.5, 1.0 };
+	// Add a camera and use it as the current active camera
+	double aspect_ratio = static_cast<double>(settings::WINDOW_WIDTH) / static_cast<double>(settings::WINDOW_HEIGHT);
+	auto new_camera_index = software_rasterizer.AddCamera(60.0, aspect_ratio, { 0.0, 4.0, 7 }, { 0.0, 0.0, 0.0 });
+	software_rasterizer.SetActiveCameraIndex(new_camera_index);
 
-	// Convert the vertex positions from NDC to raster space
-	model_data[0].position = utility::NDCToRasterSpace(model_data[0].position, settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT);
-	model_data[1].position = utility::NDCToRasterSpace(model_data[1].position, settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT);
-	model_data[2].position = utility::NDCToRasterSpace(model_data[2].position, settings::WINDOW_WIDTH, settings::WINDOW_HEIGHT);
+	// Vertex data for an indexed cube
+	std::shared_ptr<sr::Vertex[]> cube_vertex_data(new sr::Vertex[8]);
+	cube_vertex_data[0] = {  0.5, -0.5, -0.5 };
+	cube_vertex_data[1] = {  0.5, -0.5,  0.5 };
+	cube_vertex_data[2] = { -0.5, -0.5,  0.5 };
+	cube_vertex_data[3] = { -0.5, -0.5, -0.5 };
+	cube_vertex_data[4] = {  0.5,  0.5, -0.5 };
+	cube_vertex_data[5] = {  0.5,  0.5,  0.5 };
+	cube_vertex_data[6] = { -0.5,  0.5,  0.5 };
+	cube_vertex_data[7] = { -0.5,  0.5, -0.5 };
 
-	// Triangle "model"
-	std::shared_ptr<sr::Model> triangle_model = std::make_shared<sr::Model>();
-	triangle_model->Create(model_data, nullptr, 3 * sizeof(sr::Vertex), 0);
+	std::shared_ptr<sr::Triangle[]> cube_triangle_data(new sr::Triangle[12]);
+	cube_triangle_data[0]	= { 1, 3, 0 };
+	cube_triangle_data[1]	= { 7, 5, 4 };
+	cube_triangle_data[2]	= { 4, 1, 0 };
+	cube_triangle_data[3]	= { 5, 2, 1 };
+	cube_triangle_data[4]	= { 2, 7, 3 };
+	cube_triangle_data[5]	= { 0, 7, 4 };
+	cube_triangle_data[6]	= { 1, 2, 3 };
+	cube_triangle_data[7]	= { 7, 6, 5 };
+	cube_triangle_data[8]	= { 4, 5, 1 };
+	cube_triangle_data[9]	= { 5, 6, 2 };
+	cube_triangle_data[10]	= { 2, 6, 7 };
+	cube_triangle_data[11]	= { 0, 3, 7 };
 
-	// Add the triangle model to the model vector in the rasterizer (effectively queuing it for rendering)
-	software_rasterizer.AddModel(triangle_model);
+	// Cube model
+	std::shared_ptr<sr::Model> cube_model = std::make_shared<sr::Model>();
+	cube_model->Create(cube_vertex_data, cube_triangle_data, 8 * sizeof(sr::Vertex), 12 * sizeof(sr::Triangle));
+
+	// To test "instancing", a bunch of matrices are created here to render cube meshes at different positions in the scene
+	const glm::mat4 identity(1.f);
+	glm::mat4 matrix_0, matrix_1, matrix_2, matrix_3;
+
+	matrix_0 = glm::translate(identity, glm::vec3( 0.0, 0.0, 0.0));
+	matrix_0 = glm::rotate(matrix_0, glm::radians(20.0f), glm::vec3(0, 1, 0));
+	
+	matrix_1 = glm::translate(identity, glm::vec3(-4.0, 1.0, 0.0));
+	matrix_1 = glm::rotate(matrix_1, glm::radians(90.0f), glm::vec3(1, 0, 0));
+	
+	matrix_2 = glm::translate(identity, glm::vec3(3.0, -1.0, 0.0));
+	matrix_2 = glm::rotate(matrix_2, glm::radians(65.0f), glm::vec3(0, 1, 0));
+	
+	matrix_3 = glm::translate(identity, glm::vec3(0.0, 0.0, -1.0));
+	matrix_3 = glm::rotate(matrix_3, glm::radians(37.5f), glm::vec3(0, 0, 1));
+
+	// Add the model to the model vector in the rasterizer (effectively queuing it for rendering)
+	// Four matrices are passed here, which means the renderer will "instance" the cube four times
+	software_rasterizer.AddModel(cube_model, { matrix_0, matrix_1, matrix_2, matrix_3 });
 
 	while (window.isOpen())
 	{
@@ -55,6 +94,17 @@ int main()
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
+
+		// Clear flags
+		unsigned int flags = 0;
+		flags |= static_cast<unsigned int>(sr::ClearFlag::Color);
+		flags |= static_cast<unsigned int>(sr::ClearFlag::Depth);
+
+		// Clear render target
+		software_rasterizer.ClearScreen(flags);
+
+		// Perform some updates before rendering the scene
+		software_rasterizer.Update();
 
 		// Render the scene and save the output in the output texture
 		const sr::Pixel* const data = software_rasterizer.Render();

@@ -8,6 +8,7 @@
 namespace sr
 {
 	struct Vertex;
+	struct Triangle;
 
 	class Model
 	{
@@ -17,20 +18,20 @@ namespace sr
 
 		//! Create the model with the specified vertex data
 		void Create(
-			const std::shared_ptr<Vertex[]> vertex_data,
-			const std::shared_ptr<std::int32_t> index_data,
+			const std::shared_ptr<Vertex[]>& vertex_data,
+			const std::shared_ptr<Triangle[]>& triangle_data,
 			size_t vertex_data_size,
 			size_t index_data_size) noexcept;
 
 		const std::weak_ptr<Vertex[]>& GetVertexData() const noexcept;
-		const std::weak_ptr<std::int32_t>& GetIndexData() const noexcept;
+		const std::weak_ptr<Triangle[]>& GetIndexData() const noexcept;
 
 		size_t GetVertexDataSize() const noexcept;
 		size_t GetIndexDataSize() const noexcept;
 
 	private:
 		std::weak_ptr<Vertex[]> m_vertex_data;
-		std::weak_ptr<std::int32_t> m_index_data;
+		std::weak_ptr<Triangle[]> m_index_data;
 
 		size_t m_vertex_data_size;
 		size_t m_index_data_size;
