@@ -24,6 +24,27 @@ namespace sr
 		glm::vec3 position;
 	};
 
+	struct Triangle
+	{
+		Triangle()
+		{
+			this->corner_0 = 0;
+			this->corner_1 = 0;
+			this->corner_2 = 0;
+		}
+
+		Triangle(std::uint32_t corner_0, std::uint32_t corner_1, std::uint32_t corner_2)
+		{
+			this->corner_0 = corner_0;
+			this->corner_1 = corner_1;
+			this->corner_2 = corner_2;
+		}
+
+		std::uint32_t corner_0;
+		std::uint32_t corner_1;
+		std::uint32_t corner_2;
+	};
+
 	struct Pixel
 	{
 		Pixel()
