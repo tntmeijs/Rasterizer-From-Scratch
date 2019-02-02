@@ -8,6 +8,9 @@
 // SFML
 #include <SFML/Graphics.hpp>
 
+// GLM
+#include <glm/gtc/matrix_transform.hpp>
+
 int main()
 {
 	// Window used to visualize the rasterizer output
@@ -58,8 +61,25 @@ int main()
 	std::shared_ptr<sr::Model> cube_model = std::make_shared<sr::Model>();
 	cube_model->Create(cube_vertex_data, cube_triangle_data, 8 * sizeof(sr::Vertex), 12 * sizeof(sr::Triangle));
 
+	// To test "instancing", a bunch of matrices are created here to render cube meshes at different positions in the scene
+	const glm::mat4 identity(1.f);
+	glm::mat4 matrix_0, matrix_1, matrix_2, matrix_3;
+
+	matrix_0 = glm::translate(identity, glm::vec3( 0.0,  0.0,  1.0));
+	matrix_0 = glm::rotate(matrix_0, glm::radians(20.0f), glm::vec3(0, 1, 0));
+	
+	matrix_1 = glm::translate(identity, glm::vec3(-4.0, 1.0, 0.0));
+	matrix_1 = glm::rotate(matrix_1, glm::radians(90.0f), glm::vec3(1, 0, 0));
+	
+	matrix_2 = glm::translate(identity, glm::vec3(3.0, -1.0, 0.0));
+	matrix_2 = glm::rotate(matrix_2, glm::radians(65.0f), glm::vec3(0, 1, 0));
+	
+	matrix_3 = glm::translate(identity, glm::vec3(0.0, 0.0, -2.0));
+	matrix_3 = glm::rotate(matrix_3, glm::radians(37.5f), glm::vec3(0, 0, 1));
+
 	// Add the model to the model vector in the rasterizer (effectively queuing it for rendering)
-	software_rasterizer.AddModel(cube_model);
+	// Four matrices are passed here, which means the renderer will "instance" the cube four times
+	software_rasterizer.AddModel(cube_model, { matrix_0, matrix_1, matrix_2, matrix_3 });
 
 	while (window.isOpen())
 	{

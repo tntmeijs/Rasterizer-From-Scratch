@@ -28,9 +28,9 @@ void sr::Rasterizer::Initialize(std::uint32_t window_width, std::uint32_t window
 	m_frame_buffer = new Pixel[window_width * window_height];
 }
 
-void sr::Rasterizer::AddModel(const std::shared_ptr<Model>& model) noexcept
+void sr::Rasterizer::AddModel(const std::shared_ptr<Model>& model, const std::vector<glm::mat4>& model_matrices) noexcept
 {
-	m_models.push_back(model);
+	m_models.push_back(std::make_pair(model, model_matrices));
 }
 
 void sr::Rasterizer::SetClearColor(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a)
@@ -45,16 +45,20 @@ const sr::Pixel* const sr::Rasterizer::Render() noexcept
 {
 	for (const auto& model : m_models)
 	{
-		if (const auto& ptr = model.lock())
+		if (const auto& ptr = model.first.lock())
 		{
 			// Clear the buffer with the specified clear color
 			ClearScreen();
 
-			// If no index data is available, rasterize the model without indices
-			if (0 == ptr->GetIndexDataSize())
-				RasterizeModelWithIndices(ptr);
-			else
-				RasterizeModelWithoutIndices(ptr);
+			// "Instance models" by rendering the same model multiple times using different matrices
+			for (const auto& matrix : model.second)
+			{
+				// If no index data is available, rasterize the model without indices
+				if (ptr->GetIndexDataSize() != 0)
+					RasterizeModelWithIndices(ptr, matrix);
+				else
+					RasterizeModelWithoutIndices(ptr, matrix);
+			}
 		}
 	}
 
@@ -76,24 +80,30 @@ void sr::Rasterizer::ClearScreen()
 	}
 }
 
-void sr::Rasterizer::RasterizeModelWithIndices(const std::shared_ptr<Model>& model)
+void sr::Rasterizer::RasterizeModelWithIndices(const std::shared_ptr<Model>& model, const glm::mat4& matrix)
 {
 	const auto& vertex_data = model->GetVertexData();
-	size_t number_of_triangles = (model->GetVertexDataSize() / sizeof(sr::Vertex)) / 3;
+	const auto& index_data = model->GetIndexData();
 
-	if (auto ptr = vertex_data.lock())
+	size_t number_of_triangles = model->GetIndexDataSize() / 3;
+
+	(void)matrix;
+	(void)number_of_triangles;
+
+	// Get a hold of the vertex and index data pointers
+	const auto& vertex_data_ptr = vertex_data.lock();
+	const auto& index_data_ptr = index_data.lock();
+
+	// If the data is valid, proceed
+	if (vertex_data_ptr && index_data_ptr)
 	{
-		// Since there are no indices, assume every three vertices make up a triangle
-		for (size_t i = 0; i < number_of_triangles; i += 3)
-		{
-			RasterizeTriangle(ptr.get()[i + 0].position, ptr.get()[i + 1].position, ptr.get()[i + 2].position);
-		}
 	}
 }
 
-void sr::Rasterizer::RasterizeModelWithoutIndices(const std::shared_ptr<Model>& model)
+void sr::Rasterizer::RasterizeModelWithoutIndices(const std::shared_ptr<Model>& model, const glm::mat4& matrix)
 {
 	(void)model;
+	(void)matrix;
 	// #TODO: implement
 }
 
